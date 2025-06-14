@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { router } from 'expo-router';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-export default function IndexScreen() {
+export default function SplashScreen() {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF4E6',
   },
 }); 

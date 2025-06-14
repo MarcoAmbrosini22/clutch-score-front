@@ -1,35 +1,116 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="register" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
+          },
+          headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          contentStyle: {
+            backgroundColor: colorScheme === 'dark' ? '#000000' : '#f5f5f5',
+          },
+        }}
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="login"
+          options={{
+            title: 'Iniciar Sesión',
+            headerShown: true,
+          }}
+        />
+        <Stack.Screen
+          name="register"
+          options={{
+            title: 'Registro',
+            headerShown: true,
+          }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="visualizations"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="upload-dataset"
+          options={{
+            title: 'Cargar Dataset',
+            headerStyle: {
+              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
+            },
+            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
+        />
+        <Stack.Screen
+          name="clutch-score-viz"
+          options={{
+            title: 'Clutch Score',
+            headerStyle: {
+              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
+            },
+            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
+        />
+        <Stack.Screen
+          name="team-evolution"
+          options={{
+            title: 'Evolución del Equipo',
+            headerStyle: {
+              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
+            },
+            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
+        />
+        <Stack.Screen
+          name="about"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="help"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
     </AuthProvider>
   );
-}
+} 
