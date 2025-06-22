@@ -11,7 +11,7 @@ export default function DashboardScreen() {
       <View style={styles.header}>
         <ThemedText style={styles.welcomeText}>¡Bienvenido!</ThemedText>
         <ThemedText style={styles.subtitle}>
-          Gestiona tus datos y visualizaciones
+          Gestiona tus datos y análisis de jugadores
         </ThemedText>
       </View>
 
@@ -39,6 +39,59 @@ export default function DashboardScreen() {
                   Sube el dataset del equipo rival
                 </ThemedText>
               </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Análisis Rápido</ThemedText>
+          
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => router.push('visualizations' as any)}
+          >
+            <LinearGradient
+              colors={['#FF6600', '#FF8533']}
+              style={styles.analysisGradient}
+            >
+              <FontAwesome name="search" size={24} color="white" />
+              <ThemedText style={styles.analysisText}>
+                Análisis de Jugadores
+              </ThemedText>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <View style={styles.quickActions}>
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => router.push('visualizations' as any)}
+            >
+              <FontAwesome name="futbol-o" size={20} color="#FF6600" />
+              <ThemedText style={styles.quickActionText}>Predicción de Goles</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => router.push('visualizations' as any)}
+            >
+              <FontAwesome name="exclamation-triangle" size={20} color="#FF6600" />
+              <ThemedText style={styles.quickActionText}>Predicción de Sanciones</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => router.push('visualizations' as any)}
+            >
+              <FontAwesome name="star" size={20} color="#FF6600" />
+              <ThemedText style={styles.quickActionText}>Alto Potencial</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => router.push('visualizations' as any)}
+            >
+              <FontAwesome name="users" size={20} color="#FF6600" />
+              <ThemedText style={styles.quickActionText}>Jugadores Similares</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -136,6 +189,61 @@ const styles = StyleSheet.create({
   cardDescription: {
     fontSize: 14,
     color: '#666666',
+    textAlign: 'center',
+  },
+  analysisButton: {
+    borderRadius: 15,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#FF6600',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginBottom: 20,
+  },
+  analysisGradient: {
+    padding: 20,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  analysisText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  quickActionCard: {
+    width: '48%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#FFE5CC',
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FF6600',
+    marginTop: 8,
     textAlign: 'center',
   },
   visualizationsButton: {
