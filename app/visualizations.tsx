@@ -1,29 +1,50 @@
-import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { PlayerList } from '@/components/PlayerList';
 import { PredictionCard } from '@/components/PredictionCard';
 import { ThemedText } from '@/components/ThemedText';
-import { apiService, GoalPrediction, HighPotentialPlayersResponse, Player, SanctionPrediction, SearchPlayersResponse, SimilarPlayersResponse, TacticalRole } from '@/services/api';
+import { apiService, GoalPrediction, Player, SanctionPrediction, SearchPlayersResponse, SimilarPlayersResponse, TacticalRole } from '@/services/api';
 import { FontAwesome } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function VisualizationsScreen() {
+  const params = useLocalSearchParams();
   const [playerName, setPlayerName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [goalPrediction, setGoalPrediction] = useState<GoalPrediction | null>(null);
   const [sanctionPrediction, setSanctionPrediction] = useState<SanctionPrediction | null>(null);
   const [tacticalRole, setTacticalRole] = useState<TacticalRole | null>(null);
   const [similarPlayers, setSimilarPlayers] = useState<SimilarPlayersResponse | null>(null);
-  const [highPotentialPlayers, setHighPotentialPlayers] = useState<HighPotentialPlayersResponse | null>(null);
   const [searchResults, setSearchResults] = useState<SearchPlayersResponse | null>(null);
   
   const [loadingGoals, setLoadingGoals] = useState(false);
   const [loadingSanctions, setLoadingSanctions] = useState(false);
   const [loadingRole, setLoadingRole] = useState(false);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
-  const [loadingPotential, setLoadingPotential] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
+
+  // Efecto para manejar parámetros de búsqueda desde el dashboard
+  useEffect(() => {
+    if (params.searchQuery) {
+      const query = params.searchQuery as string;
+      setSearchQuery(query);
+      setPlayerName(query);
+      // Hacer búsqueda automática
+      handleSearchPlayersWithQuery(query);
+    }
+  }, [params.searchQuery]);
+
+  const handleSearchPlayersWithQuery = async (query: string) => {
+    setLoadingSearch(true);
+    try {
+      const results = await apiService.searchPlayers(query, 10);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching players:', error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
 
   const handleSearchPlayers = async () => {
     if (!searchQuery.trim()) {
@@ -115,19 +136,6 @@ export default function VisualizationsScreen() {
     }
   };
 
-  const handleFindHighPotentialPlayers = async () => {
-    setLoadingPotential(true);
-    try {
-      const players = await apiService.findHighPotentialPlayers(10);
-      setHighPotentialPlayers(players);
-    } catch (error) {
-      Alert.alert('Error', 'No se pudieron encontrar jugadores con alto potencial');
-      console.error(error);
-    } finally {
-      setLoadingPotential(false);
-    }
-  };
-
   const getRiskColor = (riskPercentage: string) => {
     const risk = parseFloat(riskPercentage.replace('%', ''));
     if (risk < 30) return '#28a745';
@@ -142,7 +150,6 @@ export default function VisualizationsScreen() {
 
   return (
     <View style={styles.container}>
-      <ConnectionStatus />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <TouchableOpacity 
@@ -284,33 +291,6 @@ export default function VisualizationsScreen() {
               )}
             />
           )}
-
-          {/* Jugadores con alto potencial */}
-          <View style={styles.section}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleFindHighPotentialPlayers}>
-              <FontAwesome name="star" size={20} color="white" />
-              <ThemedText style={styles.buttonText}>Encontrar Alto Potencial</ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {highPotentialPlayers && (
-            <PlayerList
-              title={`Jugadores con Alto Potencial (${highPotentialPlayers.count})`}
-              players={highPotentialPlayers.players}
-              renderPlayerInfo={(player) => (
-                <View>
-                  <ThemedText style={styles.playerInfoText}>
-                    Posición: {player.position} | Equipo: {player.team}
-                  </ThemedText>
-                  {player.clutch_score && (
-                    <ThemedText style={styles.playerInfoText}>
-                      Clutch Score: {player.clutch_score}
-                    </ThemedText>
-                  )}
-                </View>
-              )}
-            />
-          )}
         </View>
       </ScrollView>
     </View>
@@ -352,9 +332,6 @@ const styles = StyleSheet.create({
   inputSection: {
     marginBottom: 20,
   },
-  section: {
-    marginBottom: 20,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -392,6 +369,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFE5CC',
     color: '#333',
   },
+  section: {
+    marginBottom: 30,
+  },
   actionButton: {
     backgroundColor: '#FF6600',
     borderRadius: 10,
@@ -416,6 +396,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   playerInfoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  resultText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
+  similarPlayerText: {
     fontSize: 14,
     color: '#666',
     marginBottom: 2,

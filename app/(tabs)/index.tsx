@@ -1,11 +1,40 @@
+import { PlayerList } from '@/components/PlayerList';
 import { ThemedText } from '@/components/ThemedText';
+import { apiService, HighPotentialPlayersResponse } from '@/services/api';
 import { FontAwesome } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function DashboardScreen() {
+  const [highPotentialPlayers, setHighPotentialPlayers] = useState<HighPotentialPlayersResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadHighPotentialPlayers();
+  }, []);
+
+  const loadHighPotentialPlayers = async () => {
+    setLoading(true);
+    try {
+      const data = await apiService.findHighPotentialPlayers(10);
+      setHighPotentialPlayers(data);
+    } catch (error) {
+      console.error('Error loading high potential players:', error);
+      // No mostrar alerta, solo log del error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlayerSelect = (player: any) => {
+    // Navegar a visualizations con el jugador ya buscado
+    router.push({
+      pathname: 'visualizations' as any,
+      params: { searchQuery: player.player }
+    });
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -16,102 +45,70 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Cargar Datos</ThemedText>
-          <View style={styles.cardContainer}>
-            <TouchableOpacity style={styles.card}>
-              <View style={styles.cardContent}>
-                <FontAwesome name="upload" size={24} color="#FF6600" />
-                <ThemedText style={styles.cardTitle}>Equipo Propio</ThemedText>
-                <ThemedText style={styles.cardDescription}>
-                  Sube el dataset de tu equipo
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.cardContainer}>
-            <TouchableOpacity style={styles.card}>
-              <View style={styles.cardContent}>
-                <FontAwesome name="upload" size={24} color="#FF6600" />
-                <ThemedText style={styles.cardTitle}>Equipo Rival</ThemedText>
-                <ThemedText style={styles.cardDescription}>
-                  Sube el dataset del equipo rival
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-          </View>
+        {/* Información de conexión */}
+        <View style={styles.connectionInfo}>
+          <FontAwesome name="server" size={16} color="#28A745" />
+          <ThemedText style={styles.connectionText}>
+            Conectado al backend de análisis
+          </ThemedText>
         </View>
 
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Análisis Rápido</ThemedText>
-          
+        {/* Botón principal */}
+        <View style={styles.mainButtons}>
           <TouchableOpacity
-            style={styles.analysisButton}
+            style={styles.mainButton}
             onPress={() => router.push('visualizations' as any)}
           >
-            <LinearGradient
-              colors={['#FF6600', '#FF8533']}
-              style={styles.analysisGradient}
-            >
-              <FontAwesome name="search" size={24} color="white" />
-              <ThemedText style={styles.analysisText}>
-                Análisis de Jugadores
-              </ThemedText>
-            </LinearGradient>
+            <FontAwesome name="search" size={24} color="white" />
+            <ThemedText style={styles.mainButtonText}>
+              Análisis de Jugadores
+            </ThemedText>
           </TouchableOpacity>
+        </View>
 
-          <View style={styles.quickActions}>
-            <TouchableOpacity 
-              style={styles.quickActionCard}
-              onPress={() => router.push('visualizations' as any)}
-            >
-              <FontAwesome name="futbol-o" size={20} color="#FF6600" />
-              <ThemedText style={styles.quickActionText}>Predicción de Goles</ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.quickActionCard}
-              onPress={() => router.push('visualizations' as any)}
-            >
-              <FontAwesome name="exclamation-triangle" size={20} color="#FF6600" />
-              <ThemedText style={styles.quickActionText}>Predicción de Sanciones</ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.quickActionCard}
-              onPress={() => router.push('visualizations' as any)}
-            >
+        {/* Sección de Alto Potencial integrada */}
+        <View style={styles.highPotentialSection}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.titleContainer}>
               <FontAwesome name="star" size={20} color="#FF6600" />
-              <ThemedText style={styles.quickActionText}>Alto Potencial</ThemedText>
-            </TouchableOpacity>
-
+              <ThemedText style={styles.sectionTitle}>Jugadores con Alto Potencial</ThemedText>
+            </View>
             <TouchableOpacity 
-              style={styles.quickActionCard}
-              onPress={() => router.push('visualizations' as any)}
+              style={styles.reloadButton}
+              onPress={loadHighPotentialPlayers}
+              disabled={loading}
             >
-              <FontAwesome name="users" size={20} color="#FF6600" />
-              <ThemedText style={styles.quickActionText}>Jugadores Similares</ThemedText>
+              <FontAwesome name="refresh" size={16} color="#FF6600" />
             </TouchableOpacity>
           </View>
-        </View>
+          
+          <View style={styles.infoCard}>
+            <FontAwesome name="info-circle" size={16} color="#FF6600" />
+            <ThemedText style={styles.infoText}>
+              Selecciona un jugador para ver su análisis completo
+            </ThemedText>
+          </View>
 
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Visualizaciones</ThemedText>
-          <TouchableOpacity
-            style={styles.visualizationsButton}
-            onPress={() => router.push('visualizations' as any)}
-          >
-            <LinearGradient
-              colors={['#FF6600', '#FF8533']}
-              style={styles.visualizationsGradient}
-            >
-              <FontAwesome name="bar-chart" size={24} color="white" />
-              <ThemedText style={styles.visualizationsText}>
-                Ver Visualizaciones
-              </ThemedText>
-            </LinearGradient>
-          </TouchableOpacity>
+          {highPotentialPlayers && (
+            <PlayerList
+              title=""
+              players={highPotentialPlayers.players}
+              loading={loading}
+              onPlayerPress={handlePlayerSelect}
+              renderPlayerInfo={(player) => (
+                <View>
+                  <ThemedText style={styles.playerInfoText}>
+                    Posición: {player.position} | Equipo: {player.team}
+                  </ThemedText>
+                  {player.clutch_score && (
+                    <ThemedText style={styles.clutchScoreText}>
+                      ⭐ Clutch Score: {player.clutch_score}
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+            />
+          )}
         </View>
       </View>
     </ScrollView>
@@ -146,128 +143,103 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  section: {
-    marginBottom: 30,
+  connectionInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FFF8',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#D4EDDA',
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF6600',
-    marginBottom: 15,
+  connectionText: {
+    fontSize: 14,
+    color: '#155724',
+    marginLeft: 8,
+    fontWeight: '500',
   },
-  cardContainer: {
-    marginBottom: 15,
+  mainButtons: {
+    marginBottom: 25,
   },
-  card: {
+  mainButton: {
+    backgroundColor: '#FF6600',
     borderRadius: 15,
-    overflow: 'hidden',
+    padding: 20,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#FF6600',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  mainButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  highPotentialSection: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    borderWidth: 1,
-    borderColor: '#FFE5CC',
-    backgroundColor: 'white',
-  },
-  cardContent: {
-    padding: 20,
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FF6600',
-    marginTop: 10,
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
-  },
-  analysisButton: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#FF6600',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    marginBottom: 20,
-  },
-  analysisGradient: {
-    padding: 20,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  analysisText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  quickActionCard: {
-    width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 3.84,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF6600',
+    marginLeft: 8,
+  },
+  reloadButton: {
+    padding: 8,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF8F0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
     borderWidth: 1,
     borderColor: '#FFE5CC',
   },
-  quickActionText: {
-    fontSize: 12,
-    fontWeight: '600',
+  infoText: {
+    fontSize: 13,
+    color: '#666',
+    marginLeft: 8,
+    flex: 1,
+  },
+  playerInfoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  clutchScoreText: {
+    fontSize: 14,
     color: '#FF6600',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  visualizationsButton: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#FF6600',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  visualizationsGradient: {
-    padding: 20,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  visualizationsText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
+    fontWeight: '600',
   },
 }); 

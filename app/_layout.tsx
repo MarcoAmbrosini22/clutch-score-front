@@ -54,45 +54,6 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="upload-dataset"
-          options={{
-            title: 'Cargar Dataset',
-            headerStyle: {
-              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
-            },
-            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        <Stack.Screen
-          name="clutch-score-viz"
-          options={{
-            title: 'Clutch Score',
-            headerStyle: {
-              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
-            },
-            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        <Stack.Screen
-          name="team-evolution"
-          options={{
-            title: 'Evolución del Equipo',
-            headerStyle: {
-              backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFF4E6',
-            },
-            headerTintColor: colorScheme === 'dark' ? '#FFE5CC' : '#FF6600',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        <Stack.Screen
           name="about"
           options={{
             headerShown: false,
