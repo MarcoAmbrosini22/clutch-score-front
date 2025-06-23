@@ -48,6 +48,12 @@ export default function ChartsScreen() {
   };
 
   const handlePlayerSelect = async (player: any) => {
+    // Limpiar todos los resultados anteriores
+    setGoalPrediction(null);
+    setSanctionPrediction(null);
+    setTacticalRole(null);
+    setSimilarPlayers(null);
+    
     setSelectedPlayer(player);
     setLoadingPlayerData(true);
     

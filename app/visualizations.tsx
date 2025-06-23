@@ -126,8 +126,8 @@ export default function VisualizationsScreen() {
 
     setLoadingSimilar(true);
     try {
-      const players = await apiService.findSimilarPlayers(playerName, 5);
-      setSimilarPlayers(players);
+      const similar = await apiService.findSimilarPlayers(playerName, 5);
+      setSimilarPlayers(similar);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron encontrar jugadores similares');
       console.error(error);
@@ -136,16 +136,27 @@ export default function VisualizationsScreen() {
     }
   };
 
+  // Función para limpiar todos los resultados
+  const clearAllResults = () => {
+    setGoalPrediction(null);
+    setSanctionPrediction(null);
+    setTacticalRole(null);
+    setSimilarPlayers(null);
+  };
+
+  // Función para seleccionar un jugador y limpiar resultados anteriores
+  const selectPlayer = (player: Player) => {
+    // Limpiar todos los resultados anteriores
+    clearAllResults();
+    // Actualizar el nombre del jugador
+    setPlayerName(player.player);
+  };
+
   const getRiskColor = (riskPercentage: string) => {
     const risk = parseFloat(riskPercentage.replace('%', ''));
     if (risk < 30) return '#28a745';
     if (risk < 70) return '#ffc107';
     return '#dc3545';
-  };
-
-  const selectPlayer = (player: Player) => {
-    setPlayerName(player.player);
-    setSearchResults(null);
   };
 
   return (
@@ -208,10 +219,10 @@ export default function VisualizationsScreen() {
           <View style={styles.inputSection}>
             <ThemedText style={styles.sectionTitle}>Análisis de Jugador</ThemedText>
             <TextInput
-              style={styles.input}
-              placeholder="Ingresa el nombre del jugador..."
+              style={[styles.input, styles.readonlyInput]}
+              placeholder="Seleccione un jugador para analizar..."
               value={playerName}
-              onChangeText={setPlayerName}
+              editable={false}
               placeholderTextColor="#999"
             />
           </View>
@@ -220,77 +231,92 @@ export default function VisualizationsScreen() {
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>Predicciones</ThemedText>
             
+            {/* Predecir Goles */}
             <TouchableOpacity style={styles.actionButton} onPress={handlePredictGoals}>
               <FontAwesome name="futbol-o" size={20} color="white" />
               <ThemedText style={styles.buttonText}>Predecir Goles</ThemedText>
             </TouchableOpacity>
+            
+            {/* Resultado de predicción de goles */}
+            {goalPrediction && (
+              <View style={styles.resultContainer}>
+                <PredictionCard
+                  title="Predicción de Goles"
+                  value={`${goalPrediction.predicted_goals} goles`}
+                  subtitle={`Real: ${goalPrediction.actual_goals} | ${goalPrediction.position} - ${goalPrediction.team}`}
+                  icon="futbol-o"
+                  color="#28a745"
+                />
+              </View>
+            )}
 
+            {/* Predecir Sanciones */}
             <TouchableOpacity style={styles.actionButton} onPress={handlePredictSanctions}>
               <FontAwesome name="exclamation-triangle" size={20} color="white" />
               <ThemedText style={styles.buttonText}>Predecir Sanciones</ThemedText>
             </TouchableOpacity>
+            
+            {/* Resultado de predicción de sanciones */}
+            {sanctionPrediction && (
+              <View style={styles.resultContainer}>
+                <PredictionCard
+                  title="Predicción de Sanciones"
+                  value={sanctionPrediction.sanction_risk_percentage}
+                  subtitle={`${sanctionPrediction.position} - ${sanctionPrediction.team}`}
+                  icon="exclamation-triangle"
+                  color={getRiskColor(sanctionPrediction.sanction_risk_percentage)}
+                />
+              </View>
+            )}
 
+            {/* Rol Táctico */}
             <TouchableOpacity style={styles.actionButton} onPress={handleGetTacticalRole}>
               <FontAwesome name="cogs" size={20} color="white" />
               <ThemedText style={styles.buttonText}>Rol Táctico</ThemedText>
             </TouchableOpacity>
+            
+            {/* Resultado de rol táctico */}
+            {tacticalRole && (
+              <View style={styles.resultContainer}>
+                <PredictionCard
+                  title="Rol Táctico"
+                  value={tacticalRole.tactical_role}
+                  subtitle={`${tacticalRole.position} - ${tacticalRole.team}`}
+                  icon="cogs"
+                  color="#FF6600"
+                />
+              </View>
+            )}
 
+            {/* Jugadores Similares */}
             <TouchableOpacity style={styles.actionButton} onPress={handleFindSimilarPlayers}>
               <FontAwesome name="users" size={20} color="white" />
               <ThemedText style={styles.buttonText}>Jugadores Similares</ThemedText>
             </TouchableOpacity>
-          </View>
-
-          {/* Resultados de predicciones */}
-          {goalPrediction && (
-            <PredictionCard
-              title="Predicción de Goles"
-              value={`${goalPrediction.predicted_goals} goles`}
-              subtitle={`Real: ${goalPrediction.actual_goals} | ${goalPrediction.position} - ${goalPrediction.team}`}
-              icon="futbol-o"
-              color="#28a745"
-            />
-          )}
-
-          {sanctionPrediction && (
-            <PredictionCard
-              title="Predicción de Sanciones"
-              value={sanctionPrediction.sanction_risk_percentage}
-              subtitle={`${sanctionPrediction.position} - ${sanctionPrediction.team}`}
-              icon="exclamation-triangle"
-              color={getRiskColor(sanctionPrediction.sanction_risk_percentage)}
-            />
-          )}
-
-          {tacticalRole && (
-            <PredictionCard
-              title="Rol Táctico"
-              value={tacticalRole.tactical_role}
-              subtitle={`${tacticalRole.position} - ${tacticalRole.team}`}
-              icon="cogs"
-              color="#FF6600"
-            />
-          )}
-
-          {/* Jugadores similares */}
-          {similarPlayers && (
-            <PlayerList
-              title={`Jugadores Similares a ${similarPlayers.target_player} (${similarPlayers.count})`}
-              players={similarPlayers.similar_players}
-              renderPlayerInfo={(player) => (
-                <View>
-                  <ThemedText style={styles.playerInfoText}>
-                    Posición: {player.position} | Equipo: {player.team}
-                  </ThemedText>
-                  {player.clutch_score && (
-                    <ThemedText style={styles.playerInfoText}>
-                      Clutch Score: {player.clutch_score}
-                    </ThemedText>
+            
+            {/* Resultado de jugadores similares */}
+            {similarPlayers && (
+              <View style={styles.resultContainer}>
+                <PlayerList
+                  title={`Jugadores Similares a ${similarPlayers.target_player} (${similarPlayers.count})`}
+                  players={similarPlayers.similar_players}
+                  onPlayerPress={selectPlayer}
+                  renderPlayerInfo={(player) => (
+                    <View>
+                      <ThemedText style={styles.playerInfoText}>
+                        Posición: {player.position} | Equipo: {player.team}
+                      </ThemedText>
+                      {player.clutch_score && (
+                        <ThemedText style={styles.playerInfoText}>
+                          Clutch Score: {player.clutch_score}
+                        </ThemedText>
+                      )}
+                    </View>
                   )}
-                </View>
-              )}
-            />
-          )}
+                />
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -369,6 +395,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFE5CC',
     color: '#333',
   },
+  readonlyInput: {
+    backgroundColor: '#F0F0F0',
+  },
   section: {
     marginBottom: 30,
   },
@@ -410,5 +439,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 2,
+  },
+  resultContainer: {
+    marginTop: 10,
   },
 }); 
